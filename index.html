@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EcoEnergía Camagüey</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #0b0f19; color: #fff; display: flex; flex-direction: column; height: 100vh; }
+
+        /* Banner Promocional */
+        .promo-banner {
+            background: linear-gradient(90deg, #ff007a, #7928ca);
+            color: white; font-size: 0.78rem; font-weight: bold; text-align: center;
+            padding: 6px 10px; letter-spacing: 0.5px; text-transform: uppercase;
+            box-shadow: 0 2px 10px rgba(255, 0, 122, 0.3);
+        }
+
+        header {
+            background: #111827; color: white; padding: 12px 15px;
+            display: flex; flex-direction: column; gap: 10px;
+            border-bottom: 2px solid #00ff88;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.15);
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .header-title { 
+            font-size: 1.25rem; font-weight: 900; font-style: italic; letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #00ff88, #00d2ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        .header-cart-btn {
+            background: linear-gradient(135deg, #00ff88, #00b359); color: #0b0f19; border: none; padding: 7px 14px;
+            border-radius: 20px; font-weight: 800; cursor: pointer; display: flex;
+            align-items: center; gap: 6px; font-size: 0.88rem; box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+
+        .search-box {
+            width: 100%; background: #1f293d; border-radius: 8px; padding: 8px 12px;
+            display: flex; align-items: center; color: #fff; border: 1px solid #374151;
+        }
+        .search-box input { width: 100%; border: none; outline: none; font-size: 0.95rem; background: transparent; color: white; }
+        .search-box input::placeholder { color: #9ca3af; }
+
+        #syncStatus { font-size: 0.75rem; text-align: center; color: #00ff88; background: #064e3b; padding: 4px; font-weight: 600; }
+
+        .app-body { flex: 1; overflow-y: auto; padding: 15px; }
+        .section-header { font-size: 1.1rem; font-weight: 800; text-align: center; margin-bottom: 15px; color: #00d2ff; text-transform: uppercase; letter-spacing: 1px; }
+
+        .categories-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
+        .category-card {
+            background: linear-gradient(145deg, #1f293d, #111827); border: 2px solid #00d2ff; border-radius: 14px;
+            padding: 24px 15px; text-align: center; font-weight: 900; font-size: 1.15rem;
+            color: #ffffff; cursor: pointer; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 12px;
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.2); transition: transform 0.2s;
+        }
+        .category-card:active { transform: scale(0.97); border-color: #00ff88; }
+
+        .products-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .back-btn { background: #374151; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; }
+        
+        .product-item {
+            background: #111827; border-radius: 12px; padding: 12px 14px;
+            margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #1f293d; border-left: 5px solid #00ff88; gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .product-img {
+            width: 70px; height: 70px; object-fit: cover; border-radius: 8px;
+            border: 1px solid #374151; background: #0b0f19; flex-shrink: 0;
+        }
+        .product-info h4 { font-size: 0.98rem; color: #fff; margin-bottom: 4px; font-weight: 700; }
+        .product-info p { font-size: 0.78rem; color: #9ca3af; line-height: 1.2; }
+        .product-badge { display: inline-block; background: #ff007a; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; margin-top: 4px; text-transform: uppercase; }
+        
+        .product-price { font-weight: 900; color: #00ff88; font-size: 1.1rem; margin-bottom: 6px; text-align: right; text-shadow: 0 0 8px rgba(0,255,136,0.3); }
+        
+        .buy-btn { 
+            background: linear-gradient(135deg, #00d2ff, #0077ff); color: white; border: none; 
+            padding: 7px 12px; border-radius: 6px; font-weight: 800; cursor: pointer;
+            box-shadow: 0 0 8px rgba(0,210,255,0.3);
+        }
+
+        /* Modales */
+        .quantity-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center;
+            z-index: 200; display: none; backdrop-filter: blur(4px);
+        }
+        .quantity-box {
+            background: #111827; padding: 22px; border-radius: 16px; width: 85%; max-width: 320px;
+            text-align: center; color: white; border: 2px solid #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.3);
+        }
+        .qty-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 15px 0; }
+        .qty-btn { background: #1f293d; color: #00ff88; border: 1px solid #00ff88; width: 38px; height: 38px; border-radius: 50%; font-size: 1.3rem; font-weight: bold; }
+        .confirm-qty-btn { background: linear-gradient(90deg, #00ff88, #00d2ff); color: #0b0f19; border: none; padding: 12px; border-radius: 8px; font-weight: 900; width: 100%; margin-top: 10px; font-size: 1rem; }
+
+        .cart-modal {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 90%;
+            background: #111827; border-top-left-radius: 22px; border-top-right-radius: 22px;
+            border-top: 2px solid #00ff88; box-shadow: 0 -10px 30px rgba(0,255,136,0.2); 
+            transform: translateY(100%); transition: transform 0.3s ease-in-out; 
+            display: flex; flex-direction: column; z-index: 100; color: white;
+        }
+        .cart-modal.open { transform: translateY(0); }
+        .cart-header { padding: 15px; border-bottom: 1px solid #1f293d; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem; color: #00ff88; }
+        .close-cart { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #9ca3af; }
+        .cart-items { flex: 1; overflow-y: auto; padding: 15px; }
+        .cart-footer { padding: 15px; border-top: 1px solid #1f293d; background: #0b0f19; }
+        
+        .client-info-form { margin-top: 8px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .client-info-form input {
+            width: 100%; background: #1f293d; border: 1px solid #374151; border-radius: 8px;
+            padding: 10px 12px; color: white; font-size: 0.88rem; outline: none;
+        }
+        .client-info-form input:focus { border-color: #00ff88; }
+        .client-info-form input::placeholder { color: #6b7280; }
+        
+        .whatsapp-checkout-btn { 
+            width: 100%; background: linear-gradient(90deg, #25d366, #128c7e); color: white; 
+            border: none; padding: 14px; border-radius: 30px; font-size: 1.05rem; font-weight: 900; 
+            cursor: pointer; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Banner Promocional Superior -->
+    <div class="promo-banner">
+        🔥 ¡Entregas en Camagüey! Equipos probados con garantía ⚡
+    </div>
+
+    <header>
+        <div class="header-top">
+            <div class="header-title">⚡ ECOENERGÍA CAMAGÜEY</div>
+            <button class="header-cart-btn" onclick="toggleCart()">
+                🛒 Carrito (<span id="cartCountHeader">0</span>)
+            </button>
+        </div>
+        <div class="search-box">
+            <span style="margin-right: 8px;">🔍</span>
+            <input type="text" id="searchInput" placeholder="Buscar EcoFlow o Panel Solar..." oninput="buscarProductoGlobal(this.value)">
+        </div>
+    </header>
+    <div id="syncStatus">🔄 Cargando catálogo...</div>
+
+    <div class="app-body">
+        <div id="categoriesView">
+            <div class="section-header">⚡ Catálogo de Solución Energética</div>
+            <div class="categories-grid">
+                <div class="category-card" onclick="abrirCategoria('EcoFlow')">
+                    <span style="font-size:2.2rem">🔋</span>
+                    <div style="text-align: left;">
+                        <div>PLANTAS / ECOFLOW</div>
+                        <span style="font-size:0.75rem; color:#00ff88; font-weight:normal;">Baterías Portátiles LFP</span>
+                    </div>
+                </div>
+                <div class="category-card" onclick="abrirCategoria('Paneles')">
+                    <span style="font-size:2.2rem">☀️</span>
+                    <div style="text-align: left;">
+                        <div>PANELES SOLARES</div>
+                        <span style="font-size:0.75rem; color:#00d2ff; font-weight:normal;">Plegables y Rígidos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caja Informativa de Confianza -->
+            <div style="margin-top: 20px; background: #111827; border-radius: 12px; padding: 15px; border: 1px dashed #374151; text-align: center;">
+                <p style="font-size: 0.85rem; color: #00ff88; font-weight: bold; margin-bottom: 4px;">✅ ¿Por qué elegirnos?</p>
+                <p style="font-size: 0.78rem; color: #9ca3af;">Atención personalizada por WhatsApp, pruebas de funcionamiento al momento de la entrega y soporte directo.</p>
+            </div>
+        </div>
+
+        <div id="productsView" style="display: none;">
+            <div class="products-header">
+                <button class="back-btn" onclick="volverACategorias()">⬅ Volver</button>
+                <h3 id="currentCategoryTitle" style="color: #00d2ff; font-size: 1rem;">Categoría</h3>
+            </div>
+            <div id="productListContainer"></div>
+        </div>
+    </div>
+
+    <div class="quantity-modal" id="quantityModal">
+        <div class="quantity-box">
+            <h4 id="modalProdTitle" style="margin-bottom:5px; color:#00ff88;">Nombre Producto</h4>
+            <p style="color:#9ca3af; font-size:0.85rem;">Selecciona la cantidad:</p>
+            <div class="qty-controls">
+                <button class="qty-btn" onclick="ajustarModalQty(-1)">-</button>
+                <span id="modalQtyNum" style="font-size:1.5rem; font-weight:bold; color:#fff;">1</span>
+                <button class="qty-btn" onclick="ajustarModalQty(1)">+</button>
+            </div>
+            <button class="confirm-qty-btn" onclick="confirmarAgregarAlCarrito()">Añadir al Carrito 🛒</button>
+        </div>
+    </div>
+
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <span>🛒 Tu Pedido Actual</span>
+            <button class="close-cart" onclick="toggleCart()">✕</button>
+        </div>
+        
+        <div class="cart-items" id="cartItemsContainer">
+            <p style="text-align:center; color:#9ca3af; margin-top:30px;">Tu carrito está vacío</p>
+        </div>
+
+        <div class="cart-footer">
+            <div class="client-info-form" id="clientFormContainer" style="display: none;">
+                <span style="font-size: 0.85rem; color: #00ff88; font-weight: bold;">📍 Datos para Entrega en Camagüey:</span>
+                <input type="text" id="clienteNombre" placeholder="Nombre completo de quien recibe *">
+                <input type="text" id="clienteDireccion" placeholder="Dirección exacta (Reparto, Calle, #) *">
+                <input type="tel" id="clienteTelefono" placeholder="Teléfono de contacto móvil *">
+            </div>
+
+            <div style="display:flex; justify-content:space-between; font-size:1.15rem; font-weight:900; margin-bottom:12px;">
+                <span>Total Estimado:</span>
+                <span id="cartTotalPrice" style="color:#00ff88; text-shadow:0 0 8px rgba(0,255,136,0.3);">$0 USD</span>
+            </div>
+            <button class="whatsapp-checkout-btn" onclick="enviarPedidoWhatsApp()">
+                📲 Pedir por WhatsApp Ahora
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const ENLACE_CSV = "https://docs.google.com/spreadsheets/d/1lJR7xRaNwn5cxZDidYfVr-h_Q8m5YjCeH2DCW40Agbc/export?format=csv";
+
+        let baseDeDatosProductos = [];
+        let carrito = [];
+        let productoSeleccionado = null;
+        let cantidadTemp = 1;
+
+        async function cargarProductosDesdeLaNube() {
+            const syncStatus = document.getElementById('syncStatus');
+            try {
+                const respuesta = await fetch(ENLACE_CSV);
+                const textoCsv = await respuesta.text();
+                
+                const lineas = textoCsv.split('\n');
+                baseDeDatosProductos = [];
+
+                for(let i = 1; i < lineas.length; i++) {
+                    if(!lineas[i].trim()) continue;
+                    const cols = lineas[i].split(',').map(c => c.replace(/"/g, '').trim());
+                    if(cols.length >= 4) {
+                        baseDeDatosProductos.push({
+                            id: cols[0],
+                            nombre: cols[1],
+                            categoria: cols[2],
+                            precio: parseFloat(cols[3]) || 0,
+                            desc: cols[4] || '',
+                            imagen: (cols[5] && cols[5].startsWith('http')) ? cols[5] : 'https://via.placeholder.com/80/111827/00ff88?text=EcoEnergia'
+                        });
+                    }
+                }
+
+                localStorage.setItem('ecoenergia_camaguey_datos', JSON.stringify(baseDeDatosProductos));
+                syncStatus.innerText = "⚡ Catálogo actualizado (" + baseDeDatosProductos.length + " equipos listos)";
+                setTimeout(() => syncStatus.style.display = 'none', 3000);
+            } catch (error) {
+                console.log("Error al cargar en línea, intentando copia local:", error);
+                const copiaLocal = localStorage.getItem('ecoenergia_camaguey_datos');
+                if (copiaLocal) {
+                    baseDeDatosProductos = JSON.parse(copiaLocal);
+                    syncStatus.innerText = "📶 Modo sin conexión (Catálogo guardado)";
+                } else {
+                    syncStatus.innerText = "⚠️ Sin conexión y sin datos guardados.";
+                }
+            }
+        }
+
+        function coincideCategoria(catHoja, catBuscada) {
+            if(!catHoja || !catBuscada) return false;
+            let a = catHoja.toLowerCase().trim();
+            let b = catBuscada.toLowerCase().trim();
+            return a.includes(b) || b.includes(a);
+        }
+
+        function abrirCategoria(nombreCategoria, registrarHistorial = true) {
+            document.getElementById('categoriesView').style.display = 'none';
+            document.getElementById('productsView').style.display = 'block';
+            document.getElementById('currentCategoryTitle').innerText = nombreCategoria.toUpperCase();
+
+            if (registrarHistorial) {
+                history.pushState({ vista: 'categoria', nombre: nombreCategoria }, '');
+            }
+
+            const contenedor = document.getElementById('productListContainer');
+            contenedor.innerHTML = '';
+
+            const filtrados = baseDeDatosProductos.filter(m => coincideCategoria(m.categoria, nombreCategoria));
+
+            if (filtrados.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; color:#9ca3af; margin-top:20px;">No hay productos disponibles en esta categoría.</p>';
+                return;
+            }
+
+            filtrados.forEach(prod => {
+                const div = document.createElement('div');
+                div.className = 'product-item';
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px; width:68%;">
+                        <img src="${prod.imagen}" class="product-img" alt="${prod.nombre}">
+                        <div class="product-info">
+                            <h4>${prod.nombre}</h4>
+                            <p>${prod.desc}</p>
+                            <span class="product-badge">Garantía / Prueba</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right; width:32%;">
+                        <div class="product-price">$${prod.precio} USD</div>
+                        <button class="buy-btn" onclick="solicitarCantidad('${prod.id}')">+ Añadir</button>
+                    </div>
+                `;
+                contenedor.appendChild(div);
+            });
+        }
+
+        function volverACategorias(desdeHistorial = false) {
+            document.getElementById('productsView').style.display = 'none';
+            document.getElementById('categoriesView').style.display = 'block';
+            document.getElementById('searchInput').value = '';
+            
+            if (!desdeHistorial && history.state && history.state.vista === 'categoria') {
+                history.back();
+            }
+        }
+
+        window.addEventListener('popstate', (event) => {
+            const cartModal = document.getElementById('cartModal');
+            const quantityModal = document.getElementById('quantityModal');
+
+            if (cartModal.classList.contains('open')) {
+                toggleCart();
+                history.pushState(null, '');
+                return;
+            }
+            if (quantityModal.style.display === 'flex') {
+                quantityModal.style.display = 'none';
+                history.pushState(null, '');
+                return;
+            }
+
+            if (document.getElementById('productsView').style.display === 'block') {
+                volverACategorias(true);
+            }
+        });
+
+        function buscarProductoGlobal(texto) {
+            if (!texto.trim()) return;
+
+            document.getElementById('categoriesView').style.display = 'none';
+            document.getElementById('productsView').style.display = 'block';
+            document.getElementById('currentCategoryTitle').innerText = "RESULTADOS DE BÚSQUEDA";
+
+            const contenedor = document.getElementById('productListContainer');
+            contenedor.innerHTML = '';
+
+            const resultados = baseDeDatosProductos.filter(m => 
+                m.nombre.toLowerCase().includes(texto.toLowerCase()) || 
+                m.categoria.toLowerCase().includes(texto.toLowerCase())
+            );
+
+            if (resultados.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; color:#9ca3af; margin-top:20px;">No se encontró ningún equipo.</p>';
+                return;
+            }
+
+            resultados.forEach(prod => {
+                const div = document.createElement('div');
+                div.className = 'product-item';
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px; width:68%;">
+                        <img src="${prod.imagen}" class="product-img" alt="${prod.nombre}">
+                        <div class="product-info">
+                            <h4>${prod.nombre}</h4>
+                            <p>${prod.categoria} - ${prod.desc}</p>
+                            <span class="product-badge">Garantía / Prueba</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right; width:32%;">
+                        <div class="product-price">$${prod.precio} USD</div>
+                        <button class="buy-btn" onclick="solicitarCantidad('${prod.id}')">+ Añadir</button>
+                    </div>
+                `;
+                contenedor.appendChild(div);
+            });
+        }
+
+        function solicitarCantidad(id) {
+            productoSeleccionado = baseDeDatosProductos.find(p => String(p.id) === String(id));
+            if(!productoSeleccionado) return;
+            cantidadTemp = 1;
+            document.getElementById('modalProdTitle').innerText = productoSeleccionado.nombre;
+            document.getElementById('modalQtyNum').innerText = cantidadTemp;
+            document.getElementById('quantityModal').style.display = 'flex';
+        }
+
+        function ajustarModalQty(cambio) {
+            cantidadTemp += cambio;
+            if (cantidadTemp < 1) cantidadTemp = 1;
+            document.getElementById('modalQtyNum').innerText = cantidadTemp;
+        }
+
+        function confirmarAgregarAlCarrito() {
+            if (!productoSeleccionado) return;
+
+            const enCarrito = carrito.find(p => String(p.id) === String(productoSeleccionado.id));
+            if (enCarrito) {
+                enCarrito.cantidad += cantidadTemp;
+            } else {
+                carrito.push({ ...productoSeleccionado, cantidad: cantidadTemp });
+            }
+
+            document.getElementById('quantityModal').style.display = 'none';
+            actualizarUIcarrito();
+        }
+
+        function cambiarCantidadItem(id, cambio) {
+            const item = carrito.find(p => String(p.id) === String(id));
+            if (item) {
+                item.cantidad += cambio;
+                if (item.cantidad <= 0) {
+                    carrito = carrito.filter(p => String(p.id) !== String(id));
+                }
+            }
+            actualizarUIcarrito();
+        }
+
+        function actualizarUIcarrito() {
+            const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+            const totalPrecio = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+
+            document.getElementById('cartCountHeader').innerText = totalItems;
+
+            const contenedorItems = document.getElementById('cartItemsContainer');
+            const formContainer = document.getElementById('clientFormContainer');
+
+            if (carrito.length === 0) {
+                contenedorItems.innerHTML = '<p style="text-align:center; color:#9ca3af; margin-top:30px;">Tu carrito está vacío</p>';
+                formContainer.style.display = 'none';
+            } else {
+                contenedorItems.innerHTML = '';
+                formContainer.style.display = 'flex';
+
+                carrito.forEach(item => {
+                    const row = document.createElement('div');
+                    row.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #1f293d; padding-bottom:8px;";
+                    row.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <img src="${item.imagen}" style="width:40px; height:40px; border-radius:6px; object-fit:cover;">
+                            <div>
+                                <strong style="font-size:0.9rem; color:#fff;">${item.nombre}</strong><br>
+                                <small style="color:#00ff88;">$${item.precio} USD c/u</small>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button onclick="cambiarCantidadItem('${item.id}', -1)" style="background:#1f293d; color:#fff; border:1px solid #374151; padding:3px 8px; border-radius:4px;">-</button>
+                            <span style="font-weight:bold;">${item.cantidad}</span>
+                            <button onclick="cambiarCantidadItem('${item.id}', 1)" style="background:#1f293d; color:#fff; border:1px solid #374151; padding:3px 8px; border-radius:4px;">+</button>
+                        </div>
+                    `;
+                    contenedorItems.appendChild(row);
+                });
+            }
+
+            document.getElementById('cartTotalPrice').innerText = `$${totalPrecio} USD`;
+        }
+
+        function toggleCart() {
+            document.getElementById('cartModal').classList.toggle('open');
+        }
+
+        function enviarPedidoWhatsApp() {
+            if (carrito.length === 0) return;
+
+            const nombre = document.getElementById('clienteNombre').value.trim();
+            const direccion = document.getElementById('clienteDireccion').value.trim();
+            const telefono = document.getElementById('clienteTelefono').value.trim();
+
+            if (!nombre || !direccion || !telefono) {
+                alert("⚠️ Por favor, llena tus datos de entrega para poder procesar la solicitud.");
+                return;
+            }
+
+            localStorage.setItem('eco_cliente_nombre', nombre);
+            localStorage.setItem('eco_cliente_direccion', direccion);
+            localStorage.setItem('eco_cliente_telefono', telefono);
+
+            let mensaje = "⚡ *SOLICITUD DE EQUIPO - ECOENERGÍA CAMAGÜEY*%0A%0A";
+            mensaje += "👤 *Cliente:* " + encodeURIComponent(nombre) + "%0A";
+            mensaje += "📍 *Dirección:* " + encodeURIComponent(direccion) + "%0A";
+            mensaje += "📞 *Teléfono:* " + encodeURIComponent(telefono) + "%0A%0A";
+            mensaje += "📦 *EQUIPOS SELECCIONADOS:*%0A";
+
+            let total = 0;
+            carrito.forEach(item => {
+                let subtotal = item.precio * item.cantidad;
+                total += subtotal;
+                mensaje += `• ${encodeURIComponent(item.nombre)} (x${item.cantidad}) - $${subtotal} USD%0A`;
+            });
+
+            mensaje += `%0A💰 *TOTAL ESTIMADO: $${total} USD*%0A📍 _Solicitud enviada desde la PWA_`;
+
+            const numWhatsApp = "5350306150";
+            window.open(`https://wa.me/${numWhatsApp}?text=${mensaje}`, '_blank');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if(localStorage.getItem('eco_cliente_nombre')) document.getElementById('clienteNombre').value = localStorage.getItem('eco_cliente_nombre');
+            if(localStorage.getItem('eco_cliente_direccion')) document.getElementById('clienteDireccion').value = localStorage.getItem('eco_cliente_direccion');
+            if(localStorage.getItem('eco_cliente_telefono')) document.getElementById('clienteTelefono').value = localStorage.getItem('eco_cliente_telefono');
+        });
+
+        cargarProductosDesdeLaNube();
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
+    </script>
+</body>
+</html>
