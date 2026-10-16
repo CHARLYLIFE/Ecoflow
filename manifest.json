@@ -1,0 +1,21 @@
+{
+  "short_name": "EcoEnergía",
+  "name": "EcoEnergía Camagüey",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/111827/00ff88?text=Eco192",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://via.placeholder.com/512/111827/00ff88?text=Eco512",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0b0f19",
+  "theme_color": "#111827",
+  "display": "standalone",
+  "orientation": "portrait"
+}
